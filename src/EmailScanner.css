@@ -1,3 +1,9 @@
+
+body{
+  margin: 0;
+}
+
+
 .pdf-to-email-storybook {
   min-height: 100vh;
   height: 100%;
