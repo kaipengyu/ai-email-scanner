@@ -15,7 +15,7 @@ cp .env.example .env
 ```
 Add your Google Gemini API key to `.env`:
 ```
-VITE_GEMINI_API_KEY=your_api_key_here
+VITE_GEMINI_API=your_api_key_here
 ```
 Get your API key: https://aistudio.google.com/app/apikey
 

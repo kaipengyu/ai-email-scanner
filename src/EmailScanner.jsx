@@ -64,7 +64,7 @@ For image URLs, since you can't extract actual URLs from the PDF, use these plac
 Extract all visible text content accurately from the PDF.
 `;
 
-export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API_KEY || '' }) => {
+export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -310,7 +310,7 @@ ${footerHtml}
     }
 
     if (!apiKey) {
-      setError('Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file');
+      setError('Gemini API key is not configured. Please add VITE_GEMINI_API to your .env file');
       return;
     }
 
