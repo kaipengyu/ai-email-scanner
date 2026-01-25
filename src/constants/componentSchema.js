@@ -35,13 +35,18 @@ Available Email Components:
    - backgroundColor: string (hex color for section background, e.g., "#ffffff" or "#E4E1F0" for purple sections)
    - textAlign: string ("left" | "center" | "right")
 
-5. **Button** - Call-to-action button (can appear between content sections)
+5. **Button** - Call-to-action button (can appear between content sections). Supports bulletproof-style attributes (see https://buttons.cm/).
    Props:
    - text: string (button text)
    - linkUrl: string (button link)
    - backgroundColor: string (hex color for button, e.g., "#6e06c1")
    - textColor: string (hex color, e.g., "#ffffff")
    - sectionBackgroundColor: string (hex color for the section containing button, e.g., "#ffffff")
+   - backgroundImage: string (optional; direct URL to background image, e.g. imgur. HTML only; MJML uses solid fill.)
+   - width: number (button width in px, e.g., 240)
+   - height: number (button height in px, e.g., 50)
+   - borderColor: string (hex color for border, e.g., "#6e06c1")
+   - borderRadius: number (border radius in px, e.g., 40)
 
 6. **Footer** - Bottom section with logos, disclaimer, social links
    Props:

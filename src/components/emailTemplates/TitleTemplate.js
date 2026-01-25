@@ -15,7 +15,7 @@ export const generateTitleHtml = (data) => {
     <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" class="mobile" style="width: 490px; max-width: 490px; min-width:490px;" width="490">
       <tbody>
         <tr>
-          <td align="${textAlign}" class="mobilepadd" style="font-size: 24px; line-height:32px; padding-top: 13px; font-weight: bold; color: ${headlineColor}; font-family: Arial, Helvetica, sans-serif; background-color: ${backgroundColor};">${data.headline || ''}</td>
+          <td align="${textAlign}" class="mobilepadd" style="font-size: 24px; line-height:32px; padding-top: 13px; font-weight: bold; color: ${headlineColor}; font-family: Arial, Helvetica, sans-serif; background-color: ${backgroundColor};">${data.headlineHtml || data.headline || ''}</td>
         </tr>
       </tbody>
     </table>

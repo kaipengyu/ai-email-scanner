@@ -33,7 +33,7 @@ export const generateFooterHtml = (data) => {
 
 <tr>
   <td class="mobilepadd" align="center" style="padding: 0px 55px 20px 55px; text-align:left; color:#333132; font-size:10px; font-weight:normal; font-family:Arial, Helvetica, sans-serif; line-height: 14px;">
-    ${data.disclaimerText || ''}
+    ${data.disclaimerTextHtml || data.disclaimerText || ''}
   </td>
 </tr>
 

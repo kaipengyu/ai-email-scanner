@@ -5,17 +5,34 @@ import {
   generateContentHtml,
   generateButtonHtml,
   generateFooterHtml,
-  generateBaseTemplate
+  generateBaseTemplate,
+  generateHeaderMjml,
+  generateHeroImageMjml,
+  generateTitleMjml,
+  generateContentMjml,
+  generateButtonMjml,
+  generateFooterMjml,
+  generateBaseTemplateMjml
 } from '../components/emailTemplates';
 
-// Map section types to their generator functions
-const sectionGenerators = {
+// Map section types to their HTML generator functions
+const sectionGeneratorsHtml = {
   header: generateHeaderHtml,
   heroImage: generateHeroImageHtml,
   title: generateTitleHtml,
   content: generateContentHtml,
   button: generateButtonHtml,
   footer: generateFooterHtml
+};
+
+// Map section types to their MJML generator functions
+const sectionGeneratorsMjml = {
+  header: generateHeaderMjml,
+  heroImage: generateHeroImageMjml,
+  title: generateTitleMjml,
+  content: generateContentMjml,
+  button: generateButtonMjml,
+  footer: generateFooterMjml
 };
 
 // Generate email HTML from component data
@@ -25,7 +42,7 @@ export const generateEmailHtml = (data) => {
     // New format: dynamic section ordering
     const bodyContent = data.sections
       .map(section => {
-        const generator = sectionGenerators[section.type];
+        const generator = sectionGeneratorsHtml[section.type];
         if (!generator) {
           console.warn(`Unknown section type: ${section.type}`);
           return '';
@@ -53,5 +70,43 @@ ${buttonHtml}
 ${footerHtml}`;
 
     return generateBaseTemplate(bodyContent);
+  }
+};
+
+// Generate email MJML from component data
+export const generateEmailMjml = (data) => {
+  // Support both old format (for backwards compatibility) and new sections format
+  if (data.sections && Array.isArray(data.sections)) {
+    // New format: dynamic section ordering
+    const bodyContent = data.sections
+      .map(section => {
+        const generator = sectionGeneratorsMjml[section.type];
+        if (!generator) {
+          console.warn(`Unknown section type: ${section.type}`);
+          return '';
+        }
+        return generator(section.data);
+      })
+      .filter(mjml => mjml) // Remove empty sections
+      .join('\n');
+    
+    return generateBaseTemplateMjml(bodyContent);
+  } else {
+    // Old format: fixed ordering (backwards compatibility)
+    const headerMjml = generateHeaderMjml(data.header);
+    const heroMjml = generateHeroImageMjml(data.heroImage);
+    const titleMjml = generateTitleMjml(data.title);
+    const contentMjml = generateContentMjml(data.content);
+    const buttonMjml = generateButtonMjml(data.button);
+    const footerMjml = generateFooterMjml(data.footer);
+
+    const bodyContent = `${headerMjml}
+${heroMjml}
+${titleMjml}
+${contentMjml}
+${buttonMjml}
+${footerMjml}`;
+
+    return generateBaseTemplateMjml(bodyContent);
   }
 };

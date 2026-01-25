@@ -3,15 +3,17 @@ import './EmailScanner.css';
 import FileUploadZone from './components/FileUploadZone';
 import ResultsSection from './components/ResultsSection';
 import { analyzeWithGemini } from './utils/geminiApi';
-import { generateEmailHtml } from './utils/emailTemplateGenerator';
+import { generateEmailHtml, generateEmailMjml } from './utils/emailTemplateGenerator';
 
 export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [generatedHtml, setGeneratedHtml] = useState(null);
+  const [generatedMjml, setGeneratedMjml] = useState(null);
   const [componentData, setComponentData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [format, setFormat] = useState('html'); // 'html' or 'mjml'
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -20,6 +22,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
       setFile(selectedFile);
       setError(null);
       setGeneratedHtml(null);
+      setGeneratedMjml(null);
       setComponentData(null);
     } else {
       setError('Please upload a valid PDF file');
@@ -34,6 +37,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
       setFile(droppedFile);
       setError(null);
       setGeneratedHtml(null);
+      setGeneratedMjml(null);
       setComponentData(null);
     } else {
       setError('Please upload a valid PDF file');
@@ -60,10 +64,37 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
 
     try {
       const parsedData = await analyzeWithGemini(file, apiKey);
+      
+      // Initialize format-specific fields from base fields for backwards compatibility
+      if (parsedData.sections && Array.isArray(parsedData.sections)) {
+        parsedData.sections = parsedData.sections.map(section => {
+          const { type, data } = section;
+          const newData = { ...data };
+          
+          // Initialize HTML and MJML versions from base fields
+          if (type === 'title' && data.headline && !data.headlineHtml && !data.headlineMjml) {
+            newData.headlineHtml = data.headline;
+            newData.headlineMjml = data.headline;
+          }
+          if (type === 'content' && data.text && !data.textHtml && !data.textMjml) {
+            newData.textHtml = data.text;
+            newData.textMjml = data.text;
+          }
+          if (type === 'footer' && data.disclaimerText && !data.disclaimerTextHtml && !data.disclaimerTextMjml) {
+            newData.disclaimerTextHtml = data.disclaimerText;
+            newData.disclaimerTextMjml = data.disclaimerText;
+          }
+          
+          return { ...section, data: newData };
+        });
+      }
+      
       setComponentData(parsedData);
       
       const html = generateEmailHtml(parsedData);
+      const mjml = generateEmailMjml(parsedData);
       setGeneratedHtml(html);
+      setGeneratedMjml(mjml);
     } catch (err) {
       console.error('Error analyzing PDF:', err);
       setError(err.message || 'Failed to analyze PDF. Please try again.');
@@ -73,9 +104,10 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
   };
 
   const handleCopy = async () => {
-    if (!generatedHtml) return;
+    const content = format === 'mjml' ? generatedMjml : generatedHtml;
+    if (!content) return;
     try {
-      await navigator.clipboard.writeText(generatedHtml);
+      await navigator.clipboard.writeText(content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -84,16 +116,23 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
   };
 
   const handleDownload = () => {
-    if (!generatedHtml) return;
-    const blob = new Blob([generatedHtml], { type: 'text/html' });
+    const content = format === 'mjml' ? generatedMjml : generatedHtml;
+    if (!content) return;
+    const extension = format === 'mjml' ? 'mjml' : 'html';
+    const mimeType = format === 'mjml' ? 'text/mjml' : 'text/html';
+    const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'email-template.html';
+    a.download = `email-template.${extension}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleFormatChange = (newFormat) => {
+    setFormat(newFormat);
   };
 
   const updateComponentData = (sectionIndex, field, value) => {
@@ -102,12 +141,19 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
     // Handle new sections array format
     if (newData.sections && Array.isArray(newData.sections)) {
       newData.sections = [...newData.sections];
+      const section = newData.sections[sectionIndex];
+      const isButton = section?.type === 'button';
+      const simpleButtonFields = ['text', 'linkUrl', 'backgroundColor', 'textColor', 'sectionBackgroundColor', 'backgroundImage', 'width', 'height', 'borderColor', 'borderRadius'];
+
+      let nextSectionData = { ...section.data, [field]: value };
+      if (isButton && simpleButtonFields.includes(field)) {
+        const { buttonHtml, buttonMjml, ...rest } = nextSectionData;
+        nextSectionData = { ...rest, [field]: value };
+      }
+
       newData.sections[sectionIndex] = {
-        ...newData.sections[sectionIndex],
-        data: {
-          ...newData.sections[sectionIndex].data,
-          [field]: value
-        }
+        ...section,
+        data: nextSectionData
       };
     } else {
       // Old format handling (backwards compatibility)
@@ -124,7 +170,9 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
     
     setComponentData(newData);
     const html = generateEmailHtml(newData);
+    const mjml = generateEmailMjml(newData);
     setGeneratedHtml(html);
+    setGeneratedMjml(mjml);
   };
 
   return (
@@ -167,11 +215,14 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
 
         <ResultsSection
           generatedHtml={generatedHtml}
+          generatedMjml={generatedMjml}
           componentData={componentData}
           onComponentUpdate={updateComponentData}
           onCopy={handleCopy}
           onDownload={handleDownload}
           copied={copied}
+          format={format}
+          onFormatChange={handleFormatChange}
         />
       </div>
     </div>

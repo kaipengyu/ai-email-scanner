@@ -12,7 +12,7 @@ export const generateContentHtml = (data) => {
     <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" class="mobile" style="width: 490px; max-width: 490px; min-width:490px;" width="490">
       <tbody>
         <tr>
-          <td align="${textAlign}" class="mobilepadd" style="font-size: 16px; line-height: 22px; padding-top: 16px; padding-bottom: 16px; font-weight: normal; color: ${textColor}; font-family: Arial, Helvetica, sans-serif; background-color: ${backgroundColor};">${data.text || ''}</td>
+          <td align="${textAlign}" class="mobilepadd" style="font-size: 16px; line-height: 22px; padding-top: 16px; padding-bottom: 16px; font-weight: normal; color: ${textColor}; font-family: Arial, Helvetica, sans-serif; background-color: ${backgroundColor};">${data.textHtml || data.text || ''}</td>
         </tr>
       </tbody>
     </table>
