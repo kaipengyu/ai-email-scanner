@@ -18,6 +18,12 @@ table { border-spacing: 0; }
   .disappear { display: none !important; }
   .show-mb { display: block !important; width: 100% !important; max-height: none !important; overflow: visible !important; }
 }
+@media (prefers-color-scheme: dark) {
+  .cta-button-link,
+  table[role="button"] a { color: #ffffff !important; }
+}
+[data-ogsc] .cta-button-link,
+[data-ogsc] table[role="button"] a { color: #ffffff !important; }
 </style>
 </head>
 <body style="width:100%; padding:0px; margin:0 auto; background: #EEEEEE;">

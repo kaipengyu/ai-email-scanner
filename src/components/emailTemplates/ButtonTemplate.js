@@ -58,7 +58,7 @@ export const generateButtonHtml = (data) => {
                 <center style="color:${textColor};font-family:sans-serif;font-size:18px;font-weight:bold;">${data.text || 'Click Here'}</center>
               </v:roundrect>
               <![endif]-->
-              <a href="${data.linkUrl || '#'}" style="${linkStyle.join('; ')}" target="_blank">${data.text || 'Click Here'}</a>
+              <a class="cta-button-link" href="${data.linkUrl || '#'}" style="${linkStyle.join('; ')}" target="_blank">${data.text || 'Click Here'}</a>
             </div>
           </td>
         </tr>

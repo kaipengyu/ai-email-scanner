@@ -35,6 +35,10 @@ export const generateBaseTemplateMjml = (bodyContent) => {
         margin: 0 auto !important;
         display: block !important;
       }
+      @media (prefers-color-scheme: dark) {
+        .button-section a { color: #ffffff !important; }
+      }
+      [data-ogsc] .button-section a { color: #ffffff !important; }
     </mj-style>
   </mj-head>
   <mj-body background-color="#EEEEEE">

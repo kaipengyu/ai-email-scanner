@@ -176,9 +176,9 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
   };
 
   return (
-    <div className="pdf-to-email-storybook">
+    <>
       <header className="pte-header">
-        <h1>🪄 AI Email Generator</h1>
+        <h1>AI Email Generator</h1>
         <p>Upload an email design PDF and let AI generate the HTML code using our storybook components</p>
       </header>
 
@@ -206,9 +206,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
                 Analyzing PDF with AI...
               </>
             ) : (
-              <>
-                <span>✨</span> Generate Email HTML
-              </>
+              'Generate Email HTML'
             )}
           </button>
         </div>
@@ -225,7 +223,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
           onFormatChange={handleFormatChange}
         />
       </div>
-    </div>
+    </>
   );
 };
 

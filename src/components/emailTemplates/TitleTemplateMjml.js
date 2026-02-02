@@ -7,9 +7,9 @@ export const generateTitleMjml = (data) => {
   const textAlign = data.textAlign || 'left';
   
   return `      <!-- BEGIN: Title Block -->
-      <mj-spacer height="30px" />
       <mj-section background-color="${backgroundColor}" padding="13px 55px 0 55px">
         <mj-column>
+          <mj-spacer height="30px" />
           <mj-text 
             font-size="24px" 
             line-height="32px" 

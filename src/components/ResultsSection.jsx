@@ -61,7 +61,16 @@ const ResultsSection = ({ generatedHtml, generatedMjml, componentData, onCompone
 
       <details className="pte-details">
         <summary>View Full {formatLabel} Code</summary>
-        <pre><code>{currentOutput}</code></pre>
+        <div className="pte-fullcode-wrap">
+          <button
+            type="button"
+            className="pte-btn pte-copy-btn pte-fullcode-copy"
+            onClick={onCopy}
+          >
+            {copied ? '✓ Copied!' : 'Copy'}
+          </button>
+          <pre><code>{currentOutput}</code></pre>
+        </div>
       </details>
     </div>
   );

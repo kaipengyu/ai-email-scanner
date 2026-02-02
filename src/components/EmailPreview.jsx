@@ -3,6 +3,7 @@ import mjml2html from 'mjml-browser';
 
 const EmailPreview = ({ html, mjml, format }) => {
   const [previewHtml, setPreviewHtml] = useState(html);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     if (format === 'mjml' && mjml) {
@@ -89,16 +90,64 @@ const EmailPreview = ({ html, mjml, format }) => {
 
   if (!previewHtml) return null;
 
+  // Simulate dark mode email client rendering (like Email on Acid)
+  // This inverts colors while preserving images
+  const getDisplayHtml = () => {
+    if (!isDarkMode) return previewHtml;
+    
+    // Inject dark mode simulation styles that mimic email client dark mode
+    const darkModeStyle = `<style>
+      /* Force dark mode color scheme */
+      :root { color-scheme: dark; }
+      
+      /* Invert the entire page, then re-invert images to preserve them */
+      html {
+        filter: invert(1) hue-rotate(180deg);
+        background-color: #fff !important;
+      }
+      
+      /* Preserve images and media by inverting them back */
+      img, video, picture, svg, [style*="background-image"] {
+        filter: invert(1) hue-rotate(180deg);
+      }
+    </style>`;
+    
+    if (previewHtml.includes('</head>')) {
+      return previewHtml.replace('</head>', `${darkModeStyle}</head>`);
+    } else if (previewHtml.includes('<body')) {
+      return previewHtml.replace('<body', `${darkModeStyle}<body`);
+    }
+    return darkModeStyle + previewHtml;
+  };
+
   return (
     <div className="pte-preview">
-      <h3>Preview</h3>
+      <div className="pte-preview-header">
+        <h3>Preview</h3>
+        <div className="pte-preview-mode-toggle">
+          <button
+            className={`pte-mode-btn ${!isDarkMode ? 'active' : ''}`}
+            onClick={() => setIsDarkMode(false)}
+            title="Light mode"
+          >
+            ☀️
+          </button>
+          <button
+            className={`pte-mode-btn ${isDarkMode ? 'active' : ''}`}
+            onClick={() => setIsDarkMode(true)}
+            title="Dark mode"
+          >
+            🌙
+          </button>
+        </div>
+      </div>
       <div className="pte-preview-frame">
         <iframe
-          srcDoc={previewHtml}
+          srcDoc={getDisplayHtml()}
           title="Email Preview"
           width="100%"
           height="500"
-          style={{ border: 'none', background: '#EEEEEE' }}
+          style={{ border: 'none' }}
         />
       </div>
     </div>
