@@ -85,22 +85,24 @@ const ComponentDataEditor = ({ componentData, onUpdate, format = 'html' }) => {
 
         {componentData.sections.map((section, index) => {
           const { type, data } = section;
-          let icon = '📄';
           let title = type;
 
           switch (type) {
-            case 'header': icon = '📧'; title = 'Header'; break;
-            case 'heroImage': icon = '🖼️'; title = 'Hero Image'; break;
-            case 'title': icon = '📝'; title = 'Title'; break;
-            case 'content': icon = '📄'; title = `Content ${index + 1}`; break;
-            case 'button': icon = '🔘'; title = 'Button'; break;
-            case 'footer': icon = '🏢'; title = 'Footer'; break;
+            case 'header': title = 'Header'; break;
+            case 'heroImage': title = 'Hero Image'; break;
+            case 'title': title = 'Title'; break;
+            case 'content': title = `Content ${index + 1}`; break;
+            case 'infoBox': title = 'Info Box'; break;
+            case 'button': title = 'Button'; break;
+            case 'footer': title = 'Footer'; break;
           }
 
           return (
-            <details key={index} className="pte-editor-section" open>
+            <details key={index} className="pte-editor-section">
               <summary className="pte-editor-section-title">
-                {icon} {title} <span style={{fontSize: '12px', opacity: 0.7}}>(Position: {index + 1})</span>
+                <span className="pte-accordion-icon"></span>
+                <span className="pte-accordion-title">{title}</span>
+                <span className="pte-accordion-position">Section {index + 1}</span>
               </summary>
               <table className="pte-editor-table">
                 <tbody>
@@ -138,6 +140,40 @@ const ComponentDataEditor = ({ componentData, onUpdate, format = 'html' }) => {
                       {renderEditableField(index, 'textColor', data.textColor, 'Text Color', 'color')}
                       {renderEditableField(index, 'backgroundColor', data.backgroundColor, 'Background Color', 'color')}
                       {renderEditableField(index, 'textAlign', data.textAlign, 'Text Alignment', 'select')}
+                    </>
+                  )}
+
+                  {type === 'infoBox' && (
+                    <>
+                      {renderEditableField(index, 'backgroundColor', data.backgroundColor, 'Background Color', 'color')}
+                      {renderEditableField(index, 'textColor', data.textColor, 'Text Color', 'color')}
+                      {renderEditableField(index, 'linkColor', data.linkColor, 'Link Color', 'color')}
+                      <tr>
+                        <td className="pte-table-label">Items (JSON)</td>
+                        <td className="pte-table-control">
+                          <div className="pte-code-editor-wrapper">
+                            <div className="pte-code-editor-label">
+                              Info Items
+                              <span className="pte-code-hint">Array of items with label, text, and optional linkUrl</span>
+                            </div>
+                            <textarea
+                              value={JSON.stringify(data.items || [], null, 2)}
+                              onChange={(e) => {
+                                try {
+                                  const items = JSON.parse(e.target.value);
+                                  onUpdate(index, 'items', items);
+                                } catch (err) {
+                                  // Invalid JSON, don't update
+                                }
+                              }}
+                              rows={10}
+                              className="pte-input pte-code-editor"
+                              placeholder='[{"label": "Meeting ID", "text": "123456"}]'
+                              spellCheck={false}
+                            />
+                          </div>
+                        </td>
+                      </tr>
                     </>
                   )}
 
@@ -185,10 +221,42 @@ const ComponentDataEditor = ({ componentData, onUpdate, format = 'html' }) => {
 
                   {type === 'footer' && (
                     <>
+                      {renderEditableField(index, 'logoUrl', data.logoUrl, 'Footer Logo URL', 'url')}
+                      {renderEditableField(index, 'logoLinkUrl', data.logoLinkUrl, 'Logo Link URL', 'url')}
+                      {renderEditableField(index, format === 'html' ? 'eligibilityTextHtml' : 'eligibilityTextMjml', format === 'html' ? (data.eligibilityTextHtml || data.eligibilityText || '') : (data.eligibilityTextMjml || data.eligibilityText || ''), 'Eligibility Text', format)}
+                      <tr>
+                        <td className="pte-table-label">Social Icons (JSON)</td>
+                        <td className="pte-table-control">
+                          <div className="pte-code-editor-wrapper">
+                            <div className="pte-code-editor-label">
+                              Social Media Icons
+                              <span className="pte-code-hint">Array of icons with platform, iconUrl, linkUrl, alt</span>
+                            </div>
+                            <textarea
+                              value={JSON.stringify(data.socialIcons || [], null, 2)}
+                              onChange={(e) => {
+                                try {
+                                  const icons = JSON.parse(e.target.value);
+                                  onUpdate(index, 'socialIcons', icons);
+                                } catch (err) {
+                                  // Invalid JSON, don't update
+                                }
+                              }}
+                              rows={6}
+                              className="pte-input pte-code-editor"
+                              placeholder='[{"platform": "Facebook", "iconUrl": "...", "linkUrl": "..."}]'
+                              spellCheck={false}
+                            />
+                          </div>
+                        </td>
+                      </tr>
                       {renderEditableField(index, 'companyName', data.companyName, 'Company Name')}
                       {renderEditableField(index, 'companyAddress', data.companyAddress, 'Company Address')}
                       {renderEditableField(index, 'copyrightYear', data.copyrightYear, 'Copyright Year')}
-                      {renderEditableField(index, format === 'html' ? 'disclaimerTextHtml' : 'disclaimerTextMjml', format === 'html' ? (data.disclaimerTextHtml || data.disclaimerText || '') : (data.disclaimerTextMjml || data.disclaimerText || ''), 'Disclaimer Text', format)}
+                      {renderEditableField(index, 'unsubscribeUrl', data.unsubscribeUrl, 'Unsubscribe URL', 'url')}
+                      {renderEditableField(index, 'termsUrl', data.termsUrl, 'Terms of Use URL', 'url')}
+                      {renderEditableField(index, 'privacyUrl', data.privacyUrl, 'Privacy Policy URL', 'url')}
+                      {renderEditableField(index, 'viewInBrowserUrl', data.viewInBrowserUrl, 'View in Browser URL', 'url')}
                       {renderEditableField(index, 'backgroundColor', data.backgroundColor, 'Background Color', 'color')}
                     </>
                   )}

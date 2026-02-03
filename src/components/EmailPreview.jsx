@@ -128,16 +128,14 @@ const EmailPreview = ({ html, mjml, format }) => {
           <button
             className={`pte-mode-btn ${!isDarkMode ? 'active' : ''}`}
             onClick={() => setIsDarkMode(false)}
-            title="Light mode"
           >
-            ☀️
+            Light Mode
           </button>
           <button
             className={`pte-mode-btn ${isDarkMode ? 'active' : ''}`}
             onClick={() => setIsDarkMode(true)}
-            title="Dark mode"
           >
-            🌙
+            Dark Mode
           </button>
         </div>
       </div>

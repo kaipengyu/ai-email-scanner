@@ -1,8 +1,9 @@
-import { COMPONENT_SCHEMA } from '../constants/componentSchema';
-import { VALIDATION_PROMPT } from '../constants/validationSchema';
+import { getComponentSchema } from '../constants/componentSchema';
+import { VALIDATION_PROMPT, getValidationPrompt } from '../constants/validationSchema';
+import { DEFAULT_TEMPLATE } from '../constants/templateConfig';
 
 // Analyze PDF with Gemini AI
-export const analyzeWithGemini = async (file, apiKey) => {
+export const analyzeWithGemini = async (file, apiKey, templateId = DEFAULT_TEMPLATE) => {
   if (!file) {
     throw new Error('Please upload a PDF file first');
   }
@@ -10,6 +11,9 @@ export const analyzeWithGemini = async (file, apiKey) => {
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please add VITE_GEMINI_API to your .env file');
   }
+
+  // Get the appropriate component schema for the selected template
+  const componentSchema = getComponentSchema(templateId);
 
   const base64 = await new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -33,7 +37,7 @@ export const analyzeWithGemini = async (file, apiKey) => {
           {
             parts: [
               {
-                text: COMPONENT_SCHEMA + '\n\nPlease analyze this email design PDF and generate the JSON configuration for the email components. Return ONLY the JSON object, no additional text or markdown formatting.',
+                text: componentSchema + '\n\nPlease analyze this email design PDF and generate the JSON configuration for the email components. Return ONLY the JSON object, no additional text or markdown formatting.',
               },
               {
                 inline_data: {
@@ -77,7 +81,7 @@ export const analyzeWithGemini = async (file, apiKey) => {
 };
 
 // Validate HTML with Gemini AI
-export const validateHtmlWithGemini = async (htmlContent, apiKey) => {
+export const validateHtmlWithGemini = async (htmlContent, apiKey, templateId = DEFAULT_TEMPLATE) => {
   if (!htmlContent) {
     throw new Error('Please provide HTML content to validate');
   }
@@ -85,6 +89,8 @@ export const validateHtmlWithGemini = async (htmlContent, apiKey) => {
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please add VITE_GEMINI_API to your .env file');
   }
+
+  const validationPrompt = getValidationPrompt(templateId);
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
@@ -98,7 +104,7 @@ export const validateHtmlWithGemini = async (htmlContent, apiKey) => {
           {
             parts: [
               {
-                text: VALIDATION_PROMPT + '\n\nHTML to validate:\n\n' + htmlContent,
+                text: validationPrompt + '\n\nHTML to validate:\n\n' + htmlContent,
               },
             ],
           },

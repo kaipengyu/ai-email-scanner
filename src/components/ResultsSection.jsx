@@ -31,47 +31,64 @@ const ResultsSection = ({ generatedHtml, generatedMjml, componentData, onCompone
         </div>
         <div className="pte-action-buttons">
           <button className="pte-btn pte-copy-btn" onClick={onCopy}>
-            {copied ? '✓ Copied!' : `📋 Copy ${formatLabel}`}
+            {copied ? 'Copied!' : `Copy ${formatLabel}`}
           </button>
           <button className="pte-btn pte-download-btn" onClick={onDownload}>
-            ⬇️ Download {formatLabel}
+            Download {formatLabel}
           </button>
         </div>
       </div>
 
       <EmailPreview html={generatedHtml} mjml={generatedMjml} format={format} />
 
-      {componentData && (
-        <details className="pte-details pte-editor-accordion" open>
-          <summary>Edit Email Components</summary>
-          <ComponentDataEditor 
-            componentData={componentData} 
-            onUpdate={onComponentUpdate}
-            format={format}
-          />
-        </details>
-      )}
+      <div className="pte-main-accordion">
+        {componentData && (
+          <details className="pte-main-accordion-section" open>
+            <summary className="pte-main-accordion-title">
+              <span className="pte-accordion-icon"></span>
+              <span className="pte-accordion-title">Edit Email Components</span>
+            </summary>
+            <div className="pte-main-accordion-content">
+              <ComponentDataEditor
+                componentData={componentData}
+                onUpdate={onComponentUpdate}
+                format={format}
+              />
+            </div>
+          </details>
+        )}
 
-      {componentData && (
-        <details className="pte-details">
-          <summary>View Raw JSON Data</summary>
-          <pre>{JSON.stringify(componentData, null, 2)}</pre>
-        </details>
-      )}
+        {componentData && (
+          <details className="pte-main-accordion-section">
+            <summary className="pte-main-accordion-title">
+              <span className="pte-accordion-icon"></span>
+              <span className="pte-accordion-title">View JSON Data</span>
+            </summary>
+            <div className="pte-main-accordion-content pte-main-accordion-code">
+              <pre>{JSON.stringify(componentData, null, 2)}</pre>
+            </div>
+          </details>
+        )}
 
-      <details className="pte-details">
-        <summary>View Full {formatLabel} Code</summary>
-        <div className="pte-fullcode-wrap">
-          <button
-            type="button"
-            className="pte-btn pte-copy-btn pte-fullcode-copy"
-            onClick={onCopy}
-          >
-            {copied ? '✓ Copied!' : 'Copy'}
-          </button>
-          <pre><code>{currentOutput}</code></pre>
-        </div>
-      </details>
+        <details className="pte-main-accordion-section">
+          <summary className="pte-main-accordion-title">
+            <span className="pte-accordion-icon"></span>
+            <span className="pte-accordion-title">View {formatLabel} Code</span>
+          </summary>
+          <div className="pte-main-accordion-content pte-main-accordion-code">
+            <div className="pte-fullcode-wrap">
+              <button
+                type="button"
+                className="pte-btn pte-copy-btn pte-fullcode-copy"
+                onClick={onCopy}
+              >
+                {copied ? '✓ Copied!' : 'Copy'}
+              </button>
+              <pre><code>{currentOutput}</code></pre>
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
   );
 };

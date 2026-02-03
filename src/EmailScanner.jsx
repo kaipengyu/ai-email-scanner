@@ -2,8 +2,10 @@ import React, { useState, useRef } from 'react';
 import './EmailScanner.css';
 import FileUploadZone from './components/FileUploadZone';
 import ResultsSection from './components/ResultsSection';
+import TemplateSelector from './components/shared/TemplateSelector';
 import { analyzeWithGemini } from './utils/geminiApi';
 import { generateEmailHtml, generateEmailMjml } from './utils/emailTemplateGenerator';
+import { DEFAULT_TEMPLATE } from './constants/templateConfig';
 
 export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
   const [file, setFile] = useState(null);
@@ -14,6 +16,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
   const [componentData, setComponentData] = useState(null);
   const [copied, setCopied] = useState(false);
   const [format, setFormat] = useState('html'); // 'html' or 'mjml'
+  const [selectedTemplate, setSelectedTemplate] = useState(DEFAULT_TEMPLATE);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -63,7 +66,7 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
     setError(null);
 
     try {
-      const parsedData = await analyzeWithGemini(file, apiKey);
+      const parsedData = await analyzeWithGemini(file, apiKey, selectedTemplate);
       
       // Initialize format-specific fields from base fields for backwards compatibility
       if (parsedData.sections && Array.isArray(parsedData.sections)) {
@@ -80,6 +83,10 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
             newData.textHtml = data.text;
             newData.textMjml = data.text;
           }
+          if (type === 'iconsSection' && data.text && !data.textHtml && !data.textMjml) {
+            newData.textHtml = data.text;
+            newData.textMjml = data.text;
+          }
           if (type === 'footer' && data.disclaimerText && !data.disclaimerTextHtml && !data.disclaimerTextMjml) {
             newData.disclaimerTextHtml = data.disclaimerText;
             newData.disclaimerTextMjml = data.disclaimerText;
@@ -90,9 +97,9 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
       }
       
       setComponentData(parsedData);
-      
-      const html = generateEmailHtml(parsedData);
-      const mjml = generateEmailMjml(parsedData);
+
+      const html = generateEmailHtml(parsedData, selectedTemplate);
+      const mjml = generateEmailMjml(parsedData, selectedTemplate);
       setGeneratedHtml(html);
       setGeneratedMjml(mjml);
     } catch (err) {
@@ -169,10 +176,24 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
     }
     
     setComponentData(newData);
-    const html = generateEmailHtml(newData);
-    const mjml = generateEmailMjml(newData);
+    const html = generateEmailHtml(newData, selectedTemplate);
+    const mjml = generateEmailMjml(newData, selectedTemplate);
     setGeneratedHtml(html);
     setGeneratedMjml(mjml);
+  };
+
+  const handleTemplateChange = (templateId) => {
+    setSelectedTemplate(templateId);
+    // Reset file and results when template changes
+    setFile(null);
+    setGeneratedHtml(null);
+    setGeneratedMjml(null);
+    setComponentData(null);
+    setError(null);
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -184,6 +205,12 @@ export const PDFToEmail = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) =
 
       <div className="pte-main">
         <div className="pte-upload-section">
+          <TemplateSelector
+            selectedTemplate={selectedTemplate}
+            onTemplateChange={handleTemplateChange}
+            disabled={loading}
+          />
+
           <FileUploadZone
             file={file}
             fileInputRef={fileInputRef}

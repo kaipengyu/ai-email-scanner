@@ -1,13 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
 import { validateHtmlWithGemini } from '../utils/geminiApi';
 import { applyAcceptedChanges } from '../utils/diffUtils';
+import { DEFAULT_TEMPLATE } from '../constants/templateConfig';
 
 /**
  * Custom hook for managing HTML validation state
  * @param {string} apiKey - Gemini API key
+ * @param {string} templateId - Template ID for brand-specific validation
  * @returns {Object} Validation state and methods
  */
-export const useValidation = (apiKey) => {
+export const useValidation = (apiKey, templateId = DEFAULT_TEMPLATE) => {
   const [originalHtml, setOriginalHtml] = useState('');
   const [validationResult, setValidationResult] = useState(null);
   const [acceptedChanges, setAcceptedChanges] = useState(new Set());
@@ -45,7 +47,7 @@ export const useValidation = (apiKey) => {
     setRejectedChanges(new Set());
 
     try {
-      const result = await validateHtmlWithGemini(htmlContent, apiKey);
+      const result = await validateHtmlWithGemini(htmlContent, apiKey, templateId);
       setValidationResult(result);
     } catch (err) {
       setError(err.message || 'Failed to validate HTML');
@@ -53,7 +55,7 @@ export const useValidation = (apiKey) => {
     } finally {
       setIsValidating(false);
     }
-  }, [apiKey]);
+  }, [apiKey, templateId]);
 
   // Accept a specific change
   const acceptChange = useCallback((issueId) => {

@@ -1,10 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import useValidation from '../../hooks/useValidation';
 import FullCodeDiffViewer from './FullCodeDiffViewer';
 import FixedCodePreview from './FixedCodePreview';
+import TemplateSelector from '../shared/TemplateSelector';
+import { DEFAULT_TEMPLATE } from '../../constants/templateConfig';
 
 const ValidationPage = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
   const fileInputRef = useRef(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(DEFAULT_TEMPLATE);
+  const [viewMode, setViewMode] = useState('code'); // 'code' or 'preview'
   const {
     originalHtml,
     validationResult,
@@ -18,7 +22,13 @@ const ValidationPage = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
     acceptAll,
     reset,
     getExportHtml,
-  } = useValidation(apiKey);
+  } = useValidation(apiKey, selectedTemplate);
+
+  const handleTemplateChange = (templateId) => {
+    setSelectedTemplate(templateId);
+    // Reset validation when template changes
+    reset();
+  };
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -69,8 +79,6 @@ const ValidationPage = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
     URL.revokeObjectURL(url);
   };
 
-  const hasAcceptedChanges = acceptedChanges.size > 0;
-
   return (
     <div className="pte-validation-page">
       <header className="pte-header">
@@ -80,6 +88,12 @@ const ValidationPage = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
 
       <div className="pte-main">
         <div className="pte-upload-section">
+          <TemplateSelector
+            selectedTemplate={selectedTemplate}
+            onTemplateChange={handleTemplateChange}
+            disabled={isValidating}
+          />
+
           <input
             ref={fileInputRef}
             type="file"
@@ -135,16 +149,17 @@ const ValidationPage = ({ apiKey = import.meta.env.VITE_GEMINI_API || '' }) => {
               onAccept={acceptChange}
               onReject={rejectChange}
               onAcceptAll={acceptAll}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onCopy={handleCopy}
+              onDownload={handleDownload}
+              previewComponent={
+                <FixedCodePreview
+                  html={getExportHtml()}
+                  acceptedCount={acceptedChanges.size}
+                />
+              }
             />
-
-            {hasAcceptedChanges && (
-              <FixedCodePreview
-                html={getExportHtml()}
-                onCopy={handleCopy}
-                onDownload={handleDownload}
-                acceptedCount={acceptedChanges.size}
-              />
-            )}
           </div>
         )}
       </div>

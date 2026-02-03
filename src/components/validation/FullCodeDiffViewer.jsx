@@ -8,8 +8,20 @@ const FullCodeDiffViewer = ({
   onAccept,
   onReject,
   onAcceptAll,
+  viewMode,
+  onViewModeChange,
+  previewComponent,
+  onCopy,
+  onDownload,
 }) => {
   const [activeIssue, setActiveIssue] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await onCopy();
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const lineRefs = useRef({});
   const containerRef = useRef(null);
 
@@ -214,8 +226,34 @@ const FullCodeDiffViewer = ({
         )}
       </div>
 
+      <div className="pte-view-toggle-row">
+        <div className="pte-view-toggle">
+          <button
+            className={`pte-toggle-btn ${viewMode === 'code' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('code')}
+          >
+            Code View
+          </button>
+          <button
+            className={`pte-toggle-btn ${viewMode === 'preview' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('preview')}
+          >
+            Preview
+          </button>
+        </div>
+        <div className="pte-view-toggle-actions">
+          <button className="pte-btn pte-download-btn" onClick={onDownload}>
+            Download Current HTML
+          </button>
+        </div>
+      </div>
+
+      {viewMode === 'code' ? (
       <div className="pte-fullcode-container">
         <div className="pte-fullcode-main" ref={containerRef}>
+          <button className="pte-code-copy-btn" onClick={handleCopy}>
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
           <div className="pte-fullcode-code">
             {lines.map((line, idx) => {
               const lineNumber = idx + 1;
@@ -427,6 +465,9 @@ const FullCodeDiffViewer = ({
           )}
         </div>
       </div>
+      ) : (
+        previewComponent
+      )}
     </div>
   );
 };
